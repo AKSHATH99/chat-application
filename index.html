@@ -57,30 +57,32 @@
     </style>
   </head>
   <body>
-    <h1>MESSAGING APP </h1>
-    <ul id="messages">
-      
-    </ul>
+    <h1>MESSAGING APP</h1>
+    <ul id="messages"></ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-    
+
     <script src="/socket.io/socket.io.js"></script>
-    
+
     <script>
       // import {nanoid} from 'nanoid';
 
-      const socket = io();
+      const socket = io({
+        auth: {
+          serverOffset: 0,
+        },
+      });
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       const messages = document.getElementById("messages");
-      let user="";
-      
+      let user = "";
+
       // Listen for "connectionMessage" as soon as the connection is established
-      socket.on("connectionMessage", (msg,username) => {
+      socket.on("connectionMessage", (msg, username,serverOffset) => {
         console.log(msg);
-        console.log(username)
-        user =username
+        console.log(username);
+        user = username;
       });
 
       //For sending message
@@ -88,24 +90,25 @@
         e.preventDefault();
         if (input.value) {
           socket.emit("chat message", input.value);
-          
+
           const item = document.createElement("li");
           console.log(item);
-          console.log(user);         
-          item.innerText = `user : ${input.value  }`;
+          console.log(user);
+          item.innerText = `user : ${input.value}`;
           input.value = "";
           // messages.appendChild(item);
           window.scrollTo(0, document.body.scrollHeight);
         }
-      }); 
+      });
 
       //Listens to chat message
-      socket.on("chat message", (msg) => {
+      socket.on("chat message", (msg,serverOffset) => {
         const item = document.createElement("li");
         console.log(item);
         item.textContent = `${user} : ${msg}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+        socket.auth.serverOffset = serverOffset;
       });
 
       //THIS ALLOWS TO USE CALLBACKS AND GET RESPONSE BACK LIKE USUALL API CALLS
@@ -116,7 +119,6 @@
       //     console.log(response.status); // 'ok'
       //   }
       // });
-
     </script>
   </body>
 </html>

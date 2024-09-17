@@ -7,11 +7,11 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { nanoid } from "nanoid";
+import { updateDB } from "./helper.js";
 
 // Manually define __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 
 const app = express();
 const server = createServer(app);
@@ -20,15 +20,13 @@ const io = new Server(server, {
   connectionStateRecovery: {},
 });
 
-
-//Generate unique nanoid for every user 
+//Generate unique nanoid for every user
 const username = nanoid(5);
-console.log("User " , username ,"connected" )
+console.log("User ", username, "connected");
 
 // Middlewares
 app.use(cors());
-app.use(bodyParser.json({ limit: '100mb' }));
-
+app.use(bodyParser.json({ limit: "100mb" }));
 
 app.get("/", (req, res) => {
   res.sendFile(join(__dirname, "index.html"));
@@ -39,14 +37,17 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 
   // Emit message when user connects
-  io.emit("connectionMessage", "SOCKET CONNECTED ",username);
+  io.emit("connectionMessage", "SOCKET CONNECTED ", username);
 
-  
   // Listen to "chat message" event
-  socket.on("chat message",(msg)=>{
+  socket.on("chat message", (msg) => {
     console.log("chat message recieved");
-    io.emit("chat message", msg)
-  })
+    io.emit("chat message", msg);
+
+    //UPDATE MESSAAGE TO DB
+    updateDB(msg , username)
+
+  });
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("user disconnected");
@@ -66,8 +67,15 @@ io.on("connection", (socket) => {
   // });
 });
 
-//DATABASE CONNECTION
-// mongoose.connect('mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/').then(()=>console.log("DATABSE CONNECTED "))
+// DATABASE CONNECTION
+mongoose
+  .connect(
+    "mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/",{
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("DATABSE CONNECTED "));
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
