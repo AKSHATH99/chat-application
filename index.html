@@ -66,20 +66,20 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script>
-      // import {nanoid} from 'nanoid';
-
+      // Socket connection
       const socket = io({
         auth: {
           serverOffset: 0,
         },
       });
+
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       const messages = document.getElementById("messages");
       let user = "";
 
       // Listen for "connectionMessage" as soon as the connection is established
-      socket.on("connectionMessage", (msg, username,serverOffset) => {
+      socket.on("connectionMessage", (msg, username, serverOffset) => {
         console.log(msg);
         console.log(username);
         user = username;
@@ -102,7 +102,7 @@
       });
 
       //Listens to chat message
-      socket.on("chat message", (msg,serverOffset) => {
+      socket.on("chat message", (msg, serverOffset) => {
         const item = document.createElement("li");
         console.log(item);
         item.textContent = `${user} : ${msg}`;

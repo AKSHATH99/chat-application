@@ -16,21 +16,38 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  //ENABLES TO STORE MISSED EVENTS IF THE CONNECTION IS LOST
+  //Enables to store missed events incase of network loss
   connectionStateRecovery: {},
 });
-
-//Generate unique nanoid for every user
-const username = nanoid(5);
-console.log("User ", username, "connected");
 
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json({ limit: "100mb" }));
 
+//Generate unique nanoid for every user
+const username = nanoid(5);
+console.log("User ", username, "connected");
+
+
+
+//MONGODB CONNECTION
+mongoose
+  .connect(
+    "mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("DATABSE CONNECTED "));
+
+
 app.get("/", (req, res) => {
   res.sendFile(join(__dirname, "index.html"));
 });
+
+
+
 
 //SOCKET CONNECTION LISTENER
 io.on("connection", (socket) => {
@@ -45,8 +62,7 @@ io.on("connection", (socket) => {
     io.emit("chat message", msg);
 
     //UPDATE MESSAAGE TO DB
-    updateDB(msg , username)
-
+    updateDB(msg, username);
   });
   // Handle disconnection
   socket.on("disconnect", () => {
@@ -67,15 +83,9 @@ io.on("connection", (socket) => {
   // });
 });
 
-// DATABASE CONNECTION
-mongoose
-  .connect(
-    "mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/",{
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => console.log("DATABSE CONNECTED "));
+
+
+
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
