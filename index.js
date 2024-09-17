@@ -1,10 +1,17 @@
-const express = require("express");
-const { createServer } = require("node:http");
-const { join } = require("node:path");
-const { Server } = require("socket.io");
-const mongoose  = require('mongoose')
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import express from "express";
+import { createServer } from "node:http";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Server } from "socket.io";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import cors from "cors";
+import { nanoid } from "nanoid";
+
+// Manually define __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 const app = express();
 const server = createServer(app);
@@ -12,6 +19,11 @@ const io = new Server(server, {
   //ENABLES TO STORE MISSED EVENTS IF THE CONNECTION IS LOST
   connectionStateRecovery: {},
 });
+
+
+//Generate unique nanoid for every user 
+const username = nanoid(5);
+console.log("User " , username ,"connected" )
 
 // Middlewares
 app.use(cors());
@@ -27,7 +39,7 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 
   // Emit message when user connects
-  io.emit("connectionMessage", "SOCKET CONNECTED ");
+  io.emit("connectionMessage", "SOCKET CONNECTED ",username);
 
   
   // Listen to "chat message" event
@@ -55,7 +67,7 @@ io.on("connection", (socket) => {
 });
 
 //DATABASE CONNECTION
-mongoose.connect('mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/').then(()=>console.log("DATABSE CONNECTED "))
+// mongoose.connect('mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/').then(()=>console.log("DATABSE CONNECTED "))
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
