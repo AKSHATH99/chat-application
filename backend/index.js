@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { nanoid } from "nanoid";
-import { updateDB } from "./helper.js";
+import { updateDB } from "./DB/helper.js";
 
 // Manually define __dirname
 const __filename = fileURLToPath(import.meta.url);
