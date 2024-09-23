@@ -1,70 +1,52 @@
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
-import "../components/Chat.css"; // If you want to move the styles to a CSS file
+import "../components/Chat.css";
+import { nanoid } from "nanoid";
 
-const ChatApp = () => {
-  const [socket, setSocket] = useState(null);
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [user, setUser] = useState("");
+const socket = io("http://localhost:3000");
+const username = nanoid(4);
 
-  useEffect(() => {
-    const newSocket = io({
-      auth: {
-        serverOffset: 0,
-      },
-    });
+function ChatApp() {
+  const [msg, setMsg] = useState('');
+  const [chat, setChat] = useState([]);
 
-    setSocket(newSocket);
-
-    newSocket.on("connectionMessage", (msg, username, serverOffset) => {
-      console.log(msg);
-      console.log(username);
-      setUser(username);
-    });
-
-    newSocket.on("chat message", (msg, serverOffset) => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        `${user}: ${msg}`,
-      ]);
-      newSocket.auth.serverOffset = serverOffset;
-    });
-
-    return () => newSocket.close(); // Cleanup on component unmount
-  }, [user]);
-
-  const handleSubmit = (e) => {
+  const sendChat = (e) => {
     e.preventDefault();
-    if (input) {
-      socket.emit("chat message", input);
-      setMessages((prevMessages) => [...prevMessages, `user: ${input}`]);
-      setInput("");
-      window.scrollTo(0, document.body.scrollHeight);
-    }
+    socket.emit("chat message", { msg, username });
+    setMsg("");
   };
 
+  useEffect(() => {
+    socket.on("chat message", (payload) => {
+      console.log(payload);
+      setChat([...chat, payload]);
+    });
+  }, [chat]);
+
   return (
-    <div>
-      <h1>MESSAGING APP</h1>
-      <ul id="messages">
-        {messages.map((msg, index) => (
-          <li key={index} className={index % 2 === 0 ? "even" : "odd"}>
-            {msg}
-          </li>
+    <div className="App">
+      <header className="App-header">
+        <h1>CHATTER ..... </h1>
+
+        {chat.map((payload, index) => (
+          <p key={index}>
+            {payload.msg} <span> id : {payload.username}</span>
+          </p>
         ))}
-      </ul>
-      <form id="form" onSubmit={handleSubmit}>
-        <input
-          id="input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          autoComplete="off"
-        />
-        <button type="submit">Send</button>
-      </form>
+
+        <form onSubmit={sendChat}>
+          <input
+            type="text"
+            name="chat"
+            placeholder="your msg here"
+            value={msg}
+            onChange={(e) => setMsg(e.target.value)}
+          />
+          <button type="submit">SEND</button>
+        </form>
+      </header>
     </div>
   );
-};
+}
 
 export default ChatApp;
