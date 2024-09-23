@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 
   // Emit message when user connects
-  io.emit("connectionMessage", "SOCKET CONNECTED ", username);
+  io.emit("connectionMessage", "You have been connected to socket  ");
 
   // Listen to "chat message" event
   socket.on("chat message", (msg) => {
