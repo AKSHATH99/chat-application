@@ -16,21 +16,22 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  //Enables to store missed events incase of network loss
+  cors: {
+    origin: "*", // Allow all origins
+    methods: [" GET", "POST"], // Allow these methods
+  },
   connectionStateRecovery: {},
 });
 
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.json({ limit: "100mb" }));
 
-//Generate unique nanoid for every user
+// Generate unique nanoid for every user
 const username = nanoid(5);
 console.log("User ", username, "connected");
 
-
-
-//MONGODB CONNECTION
+// MONGODB CONNECTION
 mongoose
   .connect(
     "mongodb+srv://akshathpkk:YFxVGhGH2VJ7SDwd@messages.akq2s.mongodb.net/",
@@ -39,17 +40,9 @@ mongoose
       useUnifiedTopology: true,
     }
   )
-  .then(() => console.log("DATABSE CONNECTED "));
+  .then(() => console.log("DATABASE CONNECTED"));
 
-
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
-});
-
-
-
-
-//SOCKET CONNECTION LISTENER
+// SOCKET CONNECTION LISTENER
 io.on("connection", (socket) => {
   console.log("a user connected");
 
@@ -58,34 +51,18 @@ io.on("connection", (socket) => {
 
   // Listen to "chat message" event
   socket.on("chat message", (msg) => {
-    console.log("chat message recieved");
+    console.log("chat message received");
     io.emit("chat message", msg);
 
-    //UPDATE MESSAAGE TO DB
+    // UPDATE MESSAGE TO DB
     updateDB(msg, username);
   });
+
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
-
-  // Emit "return" message back to client
-  //   io.emit("return", "reply message 123");
-  //   console.log("I EMITTED 'return'");
-
-  //   socket.on('request', (arg1, arg2, callback) => {
-  //     console.log(arg1); // { foo: 'bar' }
-  //     console.log(arg2); // 'baz'
-  //     callback({
-  //       status: 'ok'
-  //     });
-  //   });
-  // });
 });
-
-
-
-
 
 server.listen(3000, () => {
   console.log("server running at http://localhost:3000");
