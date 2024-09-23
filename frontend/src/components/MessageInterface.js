@@ -9,6 +9,7 @@ const username = nanoid(4);
 function ChatApp() {
   const [msg, setMsg] = useState('');
   const [chat, setChat] = useState([]);
+  const [connectionMessage, setConnectionMessage] = useState('');
 
   const sendChat = (e) => {
     e.preventDefault();
@@ -21,6 +22,11 @@ function ChatApp() {
       console.log(payload);
       setChat([...chat, payload]);
     });
+
+    socket.on("connectionMessage", ( message) => {
+      console.log(message);
+      setConnectionMessage(message);
+    });
   }, [chat]);
 
   return (
@@ -28,6 +34,11 @@ function ChatApp() {
       <header className="App-header">
         <h1>CHATTER ..... </h1>
 
+        {connectionMessage?
+        <div id="cmsg">
+          {connectionMessage  }
+        </div>:""
+        }
         {chat.map((payload, index) => (
           <p key={index}>
             {payload.msg} <span> id : {payload.username}</span>

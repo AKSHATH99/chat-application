@@ -49,4 +49,8 @@ body {
   #messages > li.odd {
     background: #efefef;
   }
+
+  #cmsg{
+    color: wheat;
+  }
   
