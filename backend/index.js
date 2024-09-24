@@ -58,6 +58,12 @@ io.on("connection", (socket) => {
     updateDB(msg, username);
   });
 
+  //Handles typing notification 
+  socket.on('typingNotification', (data) => {
+    socket.broadcast.emit('typingNotification', data); // Broadcast to others
+  });
+
+
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("user disconnected");

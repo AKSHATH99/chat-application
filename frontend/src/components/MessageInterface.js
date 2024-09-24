@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useCallback } from "react";
 import io from "socket.io-client";
 import { nanoid } from "nanoid";
+import debounce from "lodash.debounce";
 
 const socket = io("http://localhost:3000");
 const username = nanoid(4);
@@ -9,6 +10,8 @@ function ChatApp() {
   const [msg, setMsg] = useState('');
   const [chat, setChat] = useState([]);
   const [connectionMessage, setConnectionMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false); // To show "user is typing" notification.
+  const [typingUser, setTypingUser] = useState(''); // User who is typing.
 
   //For nicknames
   const [username , setUsername] = useState("")
@@ -19,6 +22,19 @@ function ChatApp() {
     socket.emit("chat message", { msg, username });
     setMsg("");
   };
+
+  // Debounce typing notification to prevent spamming the server
+  const debounceEmitTypingNotification = useCallback(
+    debounce(() => {
+      socket.emit("typingNotification", { username });
+    }, 1000), // Emit typing event after 1 second of no typing.
+    []
+  );
+
+  const HandleInputChage=(e)=>{
+    setMsg(e.target.value);
+    debounceEmitTypingNotification();
+  }
 
   //Listens to incomming messages
   useEffect(() => {
@@ -31,6 +47,24 @@ function ChatApp() {
       console.log(message);
       setConnectionMessage(message);
     });
+
+    socket.on("typingNotification", (data) => {
+      setTypingUser(data.username);
+      setIsTyping(true);
+
+      // Remove "is typing" notification after 3 seconds
+      setTimeout(() => {
+        setIsTyping(false);
+      }, 3000);
+    });
+
+    // Clean up listeners on unmount
+    return () => {
+      socket.off("chat message");
+      socket.off("connectionMessage");
+      socket.off("typingNotification");
+    };
+
   }, [chat]);
 
   useEffect(()=>{
@@ -65,6 +99,13 @@ function ChatApp() {
           ""
         )}
 
+         {/* Typing Notification */}
+         {isTyping && (
+          <div className="text-yellow-300 mb-2">
+            {typingUser} is typing...
+          </div>
+        )}
+
         {/* Chat Messages */}
         <div className="bg-gray-700 p-4 rounded-lg mb-4 h-64 overflow-y-auto">
           {chat.map((payload, index) => (
@@ -85,7 +126,7 @@ function ChatApp() {
             placeholder="
         Your message here"
             value={msg}
-            onChange={(e) => setMsg(e.target.value)}
+            onChange={HandleInputChage}
             className="w-full p-2 text-gray-900 rounded-l-lg focus:outline-none"
           />
           <button
