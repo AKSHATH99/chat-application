@@ -63,6 +63,10 @@ io.on("connection", (socket) => {
     socket.broadcast.emit('typingNotification', data); // Broadcast to others
   });
 
+  socket.on("OnlineNotification",(data)=>{
+    socket.broadcast.emit('newUserOnline', data);
+  }),
+
 
   // Handle disconnection
   socket.on("disconnect", () => {
