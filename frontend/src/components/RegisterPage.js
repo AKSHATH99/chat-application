@@ -22,6 +22,7 @@ function RegisterPage() {
     setMessage(`Welcome, ${realName} (${username})!`);
     setUsername('');
     setRealName('');
+    localStorage.setItem("username",username)
     navigate("/home")
   };
 
