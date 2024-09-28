@@ -40,6 +40,9 @@ function ChatApp() {
 
   //Listens to incomming messages
   useEffect(() => {
+
+  setUsername(localStorage.getItem("username"))
+
     socket.on("chat message", (payload) => {
       console.log(payload);
       setChat([...chat, payload]);
@@ -48,8 +51,8 @@ function ChatApp() {
     socket.on("connectionMessage", ( message) => {
       console.log(message);
       setConnectionMessage(message);
-      socket.emit("OnlineNotification", { NickName });
-      setNewUser(NickName)
+      socket.emit("OnlineNotification", { username });
+      setNewUser(username)
     });
 
     socket.on("typingNotification", (data) => {
@@ -85,7 +88,7 @@ function ChatApp() {
       <header className="App-header bg-gray-800 p-6 rounded-lg shadow-lg text-white max-w-3xl w-full">
         <h1 className="text-4xl font-bold text-center mb-6">CHATTER 💬🗨️ </h1>
 
-        <span className=" flex m-10 ">
+        {/* <span className=" flex m-10 ">
           <p className="font-bold mt-1">USERNAME : </p>{" "}
           <input
             onChange={(e) => setUsername(e.target.value)}
@@ -97,7 +100,7 @@ function ChatApp() {
           <button className="bg-green-500 text-white p-2 rounded-r-md  w-28">
             Submit
           </button>
-        </span>
+        </span> */}
         {/* Connection Message */}
         {connectionMessage ? (
           <div
